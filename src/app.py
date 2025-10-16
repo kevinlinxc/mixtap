@@ -1,14 +1,11 @@
 from litestar import Litestar, get
+from litestar.status_codes import HTTP_302_FOUND
+from litestar.response import Redirect
 
 
-@get("/")
-async def index() -> str:
-    return "Hello, world!"
+@get("/", status_code=HTTP_302_FOUND)
+async def index() -> Redirect:
+    return Redirect(path="https://google.com")
 
 
-@get("/books/{book_id:int}")
-async def get_book(book_id: int) -> dict[str, int]:
-    return {"book_id": book_id}
-
-
-app = Litestar([index, get_book])
+app = Litestar([index])
