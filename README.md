@@ -1,5 +1,5 @@
 # mixtap
-NFC tag that your friends tap to create a Spotify blend with you
+NFC tag that your friends can tap to create a Spotify blend with you
 
 ## How it works
 
@@ -22,9 +22,37 @@ Chain of events:
 
 ## Setup
 
+### Install dependencies
+
 ```
 pip install uv
 uv venv --seed -python 3.12
+
+# Windows
+.venv\Scripts\activate
+# Linux/Mac
+source .venv/bin/activate
+
 uv sync
-litestar --app src.app:app run
 ```
+
+### Simple test
+
+Sign into Spotify on your browser first, then, with your venv activated, run
+
+```
+python test.py
+```
+
+Click "Continue to the app" on the browser window that pops up, and then you should see a blend URL in the terminal. 
+
+This means everything is working.
+
+### Run the API
+
+The API will be the URL that your NFC tag points to, that will get a Blend URL to redirect to on your friend's phone.
+
+```
+litestar --app src.app:app run --port 8700
+```
+
