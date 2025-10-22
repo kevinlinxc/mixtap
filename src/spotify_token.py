@@ -46,11 +46,12 @@ class SpotifyTokenGenerator:
         # Block here until user authorizes in the browser and the local server
         # receives the authorization code.
         self.code = self.get_authorization_code(port=port)
-        self.access_token: Optional[str] = None
-        self.refresh_token_val: Optional[str] = None
+        self.access_token: str | None = None
+        self.refresh_token_val: str | None = None
         self.expires_in: int = 0
         self.request_access_token(self.code, port=port)
-        print(f"SpotifyTokenGenerator initialized with access token: {self.access_token}")
+        assert self.access_token is not None
+        print(f"SpotifyTokenGenerator initialized with access token: {self.access_token[:10]}...")
         self.test_token()
 
     def get_authorization_code(self, port: int) -> str:
@@ -93,7 +94,7 @@ class SpotifyTokenGenerator:
         code: Optional[str] = wait_for_code(host="127.0.0.1", port=port, timeout=self.auth_timeout)
         if code is None:
             raise TimeoutError("Timed out waiting for Spotify authorization code")
-        print(f"Received Spotify authorization code: {code}")
+        print(f"Received Spotify authorization code: {code[:10]}...")
         return code
 
     def request_access_token(self, code: str, port: int) -> None:
@@ -121,8 +122,9 @@ class SpotifyTokenGenerator:
         self.refresh_token_val = token_info.get("refresh_token")
         self.expires_in = token_info.get("expires_in", 0)
         granted_scopes = token_info.get("scope")
+        assert self.access_token is not None
 
-        print(f"Received token {self.access_token} which expires in {self.expires_in} seconds")
+        print(f"Received token {self.access_token[:10]}... which expires in {self.expires_in} seconds")
         print(f"Granted scopes: {granted_scopes}")
 
     def refresh_access_token(self) -> None:
