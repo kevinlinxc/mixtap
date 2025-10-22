@@ -3,6 +3,7 @@
 Provides wait_for_code(host, port, timeout) that starts a FastAPI app
 in a background thread and blocks until a code is received (or timeout).
 """
+
 from __future__ import annotations
 
 import threading
@@ -30,7 +31,7 @@ def create_simple_api(code_queue: Queue[str]) -> FastAPI:
 
 def wait_for_code(host: str = "127.0.0.1", port: int = 8898, timeout: Optional[float] = None) -> Optional[str]:
     """Start a FastAPI server (in a background thread) and block until the
-    `code` query parameter is received on GET /. 
+    `code` query parameter is received on GET /.
     Returns None on timeout (seconds).
 
     Returns the code as a string.

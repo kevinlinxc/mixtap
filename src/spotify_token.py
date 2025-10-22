@@ -5,7 +5,7 @@ Does the Authorization Code with PKCE flow as described by
 https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow
 
 Using my own Spotify Developer app client id and secret with the authorization flow/
-authorization pkce flow didn't work, it seems the app doesn't have enough privilege even with 
+authorization pkce flow didn't work, it seems the app doesn't have enough privilege even with
 all scopes selected.
 
 Using the PKCE flow with the public Spotify For Desktop client id worked,
@@ -15,6 +15,7 @@ I think the PKCE flow is used because it means you don't need the client secret,
 I decided to implement the flow myself to have low-level control, but I maybe could have used librespot-oauth.
 
 """
+
 import os
 import hashlib
 import webbrowser
@@ -34,7 +35,7 @@ load_dotenv()
 
 class SpotifyTokenGenerator:
     """
-    Helper class to do the OAuth authorization code flow with Spotify to get an access token. 
+    Helper class to do the OAuth authorization code flow with Spotify to get an access token.
     Decided to implement it manually rather than depend on a Spotify API wrapper which doesn't allow low-level changes.
     """
 
@@ -69,7 +70,11 @@ class SpotifyTokenGenerator:
         # The verifier must be between 43 and 128 characters.
         code_verifier = secrets.token_urlsafe(96)
         self.code_verifier = code_verifier
-        code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode('utf-8')).digest()).rstrip(b'=').decode('utf-8')
+        code_challenge = (
+            base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode("utf-8")).digest())
+            .rstrip(b"=")
+            .decode("utf-8")
+        )
 
         # individual extras from `extra_scopes` to find which one enables the API.
         scope = "streaming"
@@ -87,7 +92,9 @@ class SpotifyTokenGenerator:
 
         # Open the user's default browser to the authorization URL and
         # delegate waiting for the redirect to the FastAPI helper.
-        print(f"Requesting Spotify Authorization, click the \"Continue to the app\" button in your browser ({self.auth_timeout}s timeout)...")
+        print(
+            f'Requesting Spotify Authorization, click the "Continue to the app" button in your browser ({self.auth_timeout}s timeout)...'
+        )
         webbrowser.open(auth_url)
 
         # Wait for up to 300 seconds by default. Returns None on timeout.
@@ -117,7 +124,7 @@ class SpotifyTokenGenerator:
         token_info = response.json()
         if "access_token" not in token_info:
             raise ValueError(f"No access token in Spotify response: {response.json()}")
-        
+
         self.access_token = token_info["access_token"]
         self.refresh_token_val = token_info.get("refresh_token")
         self.expires_in = token_info.get("expires_in", 0)
@@ -152,7 +159,7 @@ class SpotifyTokenGenerator:
         # Spotify may or may not return a new refresh token. If it does, update it.
         if "refresh_token" in token_info:
             self.refresh_token_val = token_info["refresh_token"]
-        
+
         print(f"Refreshed token. New token: {self.access_token}, expires in {self.expires_in} seconds")
 
     def test_token(self):
@@ -168,7 +175,7 @@ class SpotifyTokenGenerator:
         if response.status_code == 200:
             return True
         return False
-    
+
     def get_blend_url(self):
         """
         Get the blend URL using the non-public Spotify API (use are your own risk here)
@@ -191,7 +198,9 @@ class SpotifyTokenGenerator:
             "authorization": "Bearer " + self.access_token,
         }
 
-        response = self.session.post("https://spclient.wg.spotify.com/blend-invitation/v1/generate?market=from_token", headers=headers)
+        response = self.session.post(
+            "https://spclient.wg.spotify.com/blend-invitation/v1/generate?market=from_token", headers=headers
+        )
 
         response.raise_for_status()
 
@@ -199,5 +208,5 @@ class SpotifyTokenGenerator:
 
         if invite_link is None:
             raise ValueError(f"Failed to get blend URL: {response.json()}")
-        
+
         return invite_link
