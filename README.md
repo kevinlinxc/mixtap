@@ -63,7 +63,7 @@ SPOTIFY_CLIENT_ID=<Spotify Desktop Client ID from [here](https://github.com/libr
 API_TOKEN_HASH=<the hash you just generated>
 ```
 
-Hold onto the API token you generated (not the hash)
+Hold onto the API token you generated (not the hash), you could put it in your .env for convenience although not technically needed
 
 ### Run the API
 
