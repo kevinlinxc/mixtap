@@ -70,7 +70,7 @@ Hold onto the API token you generated (not the hash), you could put it in your .
 The API will be the URL that your NFC tag points to, that will get a Blend URL to redirect to on your friend's phone.
 
 ```
-litestar --app src.app:app run --port 8700
+litestar --app api.app:app run --port 8700
 ```
 
 Test that it works locally by opening this link in your browser:
