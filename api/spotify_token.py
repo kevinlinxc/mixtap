@@ -159,12 +159,12 @@ class SpotifyTokenGenerator:
         # Spotify may or may not return a new refresh token. If it does, update it.
         if "refresh_token" in token_info:
             self.refresh_token_val = token_info["refresh_token"]
-
-        print(f"Refreshed token. New token: {self.access_token}, expires in {self.expires_in} seconds")
+            hours = self.expires_in / 3600
+            print(f"Refreshed token. New token: {self.access_token}, expires in {hours:.2f} hours")
 
     def test_token(self):
         """
-        Test current token by makign a simple api request to the user's profile (which requires user-read-private scope)
+        Test current token by making a simple API request to the user's profile (which requires user-read-private scope)
         """
         if self.access_token is None:
             raise ValueError("No access token available to test.")
