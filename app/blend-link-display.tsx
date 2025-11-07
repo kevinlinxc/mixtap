@@ -15,6 +15,19 @@ const INITIAL_STATE: BlendLinkState = {
 
 export function BlendLinkDisplay() {
     const [state, setState] = useState<BlendLinkState>(INITIAL_STATE);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async () => {
+        if (!state.link) return;
+
+        try {
+            await navigator.clipboard.writeText(state.link);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("[blend-link-display] failed to copy", err);
+        }
+    };
 
     useEffect(() => {
         const fetchLink = async () => {
@@ -75,14 +88,22 @@ export function BlendLinkDisplay() {
             <code className="block break-words rounded bg-white/70 p-2 text-xs font-mono dark:bg-emerald-900/40">
                 {state.link}
             </code>
-            <a
-                href={state.link}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-emerald-700"
-            >
-                Open Blend URL
-            </a>
+            <div className="flex gap-2">
+                <button
+                    onClick={handleCopy}
+                    className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                >
+                    {copied ? "Copied!" : "Copy Blend URL"}
+                </button>
+                <a
+                    href={state.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center rounded-md bg-zinc-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-zinc-600"
+                >
+                    Open Blend URL
+                </a>
+            </div>
         </div>
     );
 }
