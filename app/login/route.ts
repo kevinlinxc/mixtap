@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { exchangeCodeForToken, getCurrentUserId } from "@/app/lib/spotify";
 import { consumeAuthState } from "@/app/lib/spotify-auth-store";
-import { SESSION_COOKIE_NAME, storeSessionTokens } from "@/app/lib/spotify-token-store";
+import { SESSION_COOKIE_NAME, storeSessionTokens, storeBlendLink } from "@/app/lib/spotify-token-store";
 import { generatePassword, hashPassword } from "@/app/lib/password";
 import { getAdminClient } from "@/app/utils/supabase/admin";
 
@@ -42,7 +42,15 @@ export async function GET(request: NextRequest) {
         return response;
     }
 
-    const sessionId = sessionCookie ?? authRecord.sessionId;
+    // Always use the session ID from the auth record since that's what was set in /auth
+    const sessionId = authRecord.sessionId;
+
+    console.log("[spotify-callback] session resolution", {
+        sessionCookieFromRequest: sessionCookie ? sessionCookie.substring(0, 8) + "..." : "none",
+        authRecordSessionId: authRecord.sessionId.substring(0, 8) + "...",
+        finalSessionId: sessionId.substring(0, 8) + "...",
+        willUpdateCookie: true,
+    });
 
     if (!sessionId) {
         const response = NextResponse.redirect(new URL("/?error=missing_session", url.origin));
@@ -77,19 +85,17 @@ export async function GET(request: NextRequest) {
                 { spotify_user_id: spotifyUserId, password_hash: passwordHash },
                 { onConflict: "spotify_user_id" }
             )
-            .select("id, spotify_user_id")
+            .select("id")
             .maybeSingle();
 
         if (userError || !userRow?.id) {
             throw new Error(userError?.message ?? "Failed to upsert user record");
         }
 
-        const supabaseUserId = userRow.id;
-
         const { data: existingTokenRow, error: existingTokenError } = await supabase
             .from("tokens")
             .select("refresh_token")
-            .eq("user_id", supabaseUserId)
+            .eq("user_id", userRow.id)
             .maybeSingle();
 
         if (existingTokenError) {
@@ -103,7 +109,7 @@ export async function GET(request: NextRequest) {
             .from("tokens")
             .upsert(
                 {
-                    user_id: supabaseUserId,
+                    user_id: userRow.id,
                     access_token: tokenInfo.access_token,
                     refresh_token: refreshTokenToStore,
                 },
@@ -122,18 +128,16 @@ export async function GET(request: NextRequest) {
         });
 
         const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
-        const blendTargetId = userRow.spotify_user_id ?? spotifyUserId;
-        const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(blendTargetId)}&token=${encodeURIComponent(password)}`;
+        const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(spotifyUserId)}&token=${encodeURIComponent(password)}`;
 
-        const redirectUrl = new URL("/", url.origin);
-        redirectUrl.searchParams.set("link", blendUrl);
-
-        const response = NextResponse.redirect(redirectUrl);
+        const response = NextResponse.redirect(new URL("/", url.origin));
         const secure = process.env.NODE_ENV === "production";
         storeSessionTokens(sessionId, tokenInfo);
+        storeBlendLink(sessionId, blendUrl);
 
-        console.log("[spotify-callback] stored tokens for session", {
+        console.log("[spotify-callback] stored tokens and blend link for session", {
             sessionId,
+            blendUrl,
         });
 
         response.cookies.set(SESSION_COOKIE_NAME, sessionId, {

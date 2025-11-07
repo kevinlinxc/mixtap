@@ -70,3 +70,41 @@ export const getSessionTokens = (sessionId: string): SpotifyTokenResponse | null
 export const clearSessionTokens = (sessionId: string) => {
     tokenStore.delete(sessionId);
 };
+
+type BlendLinkRecord = {
+    link: string;
+    storedAt: number;
+};
+
+const globalBlendStore = globalThis as typeof globalThis & {
+    spotifyBlendLinkStore?: Map<string, BlendLinkRecord>;
+};
+
+const blendLinkStore = (globalBlendStore.spotifyBlendLinkStore ??= new Map<string, BlendLinkRecord>());
+
+export const storeBlendLink = (sessionId: string, link: string) => {
+    blendLinkStore.set(sessionId, {
+        link,
+        storedAt: Date.now(),
+    });
+    console.log("[spotify-token-store] stored blend link", {
+        sessionId: sessionId.substring(0, 8) + "...",
+        linkPreview: link.substring(0, 50) + "...",
+        storeSize: blendLinkStore.size
+    });
+};
+
+export const getBlendLink = (sessionId: string): string | null => {
+    const record = blendLinkStore.get(sessionId);
+    console.log("[spotify-token-store] getBlendLink called", {
+        sessionId: sessionId.substring(0, 8) + "...",
+        foundRecord: Boolean(record),
+        storeSize: blendLinkStore.size,
+        allKeysPreview: Array.from(blendLinkStore.keys()).map(k => k.substring(0, 8) + "...")
+    });
+    return record?.link ?? null;
+};
+
+export const clearBlendLink = (sessionId: string) => {
+    blendLinkStore.delete(sessionId);
+};
