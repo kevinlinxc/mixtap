@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { exchangeCodeForToken } from "@/app/lib/spotify";
+import { exchangeCodeForToken, getCurrentUserId } from "@/app/lib/spotify";
 import { consumeAuthState } from "@/app/lib/spotify-auth-store";
 import { SESSION_COOKIE_NAME, storeSessionTokens } from "@/app/lib/spotify-token-store";
+import { generatePassword, hashPassword } from "@/app/lib/password";
+import { getAdminClient } from "@/app/utils/supabase/admin";
 
 const CALLBACK_FALLBACK = "http://127.0.0.1:3000/login";
 
@@ -63,6 +65,53 @@ export async function GET(request: NextRequest) {
             codeVerifier: authRecord.codeVerifier,
         });
 
+        const spotifyUserId = await getCurrentUserId(tokenInfo.access_token);
+
+        const supabase = getAdminClient();
+        const password = generatePassword();
+        const passwordHash = hashPassword(password);
+
+        const { data: userRow, error: userError } = await supabase
+            .from("users")
+            .upsert(
+                { spotify_user_id: spotifyUserId, password_hash: passwordHash },
+                { onConflict: "spotify_user_id" }
+            )
+            .select("id")
+            .maybeSingle();
+
+        if (userError || !userRow?.id) {
+            throw new Error(userError?.message ?? "Failed to upsert user record");
+        }
+
+        const { data: existingTokenRow, error: existingTokenError } = await supabase
+            .from("tokens")
+            .select("refresh_token")
+            .eq("user_id", userRow.id)
+            .maybeSingle();
+
+        if (existingTokenError) {
+            throw new Error(existingTokenError.message);
+        }
+
+        const refreshTokenToStore =
+            tokenInfo.refresh_token ?? existingTokenRow?.refresh_token ?? null;
+
+        const { error: tokenUpsertError } = await supabase
+            .from("tokens")
+            .upsert(
+                {
+                    user_id: userRow.id,
+                    access_token: tokenInfo.access_token,
+                    refresh_token: refreshTokenToStore,
+                },
+                { onConflict: "user_id" }
+            );
+
+        if (tokenUpsertError) {
+            throw new Error(tokenUpsertError.message);
+        }
+
         console.log("[spotify-callback] received token response", {
             state,
             expiresIn: tokenInfo.expires_in,
@@ -70,7 +119,13 @@ export async function GET(request: NextRequest) {
             scope: tokenInfo.scope,
         });
 
-        const response = NextResponse.redirect(new URL("/", url.origin));
+        const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+        const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(userRow.id)}&token=${encodeURIComponent(password)}`;
+
+        const redirectUrl = new URL("/", url.origin);
+        redirectUrl.searchParams.set("link", blendUrl);
+
+        const response = NextResponse.redirect(redirectUrl);
         const secure = process.env.NODE_ENV === "production";
         storeSessionTokens(sessionId, tokenInfo);
 

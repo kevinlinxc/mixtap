@@ -142,6 +142,31 @@ export const testToken = async (accessToken: string) => {
     return response.ok;
 };
 
+export type SpotifyUserProfile = {
+    id: string;
+};
+
+export const getCurrentUserId = async (accessToken: string): Promise<string> => {
+    const response = await fetch("https://api.spotify.com/v1/me", {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(`Failed to fetch Spotify user profile: ${JSON.stringify(errorPayload)}`);
+    }
+
+    const profile = (await response.json()) as SpotifyUserProfile;
+
+    if (!profile.id) {
+        throw new Error("Spotify user profile response did not include an id");
+    }
+
+    return profile.id;
+};
+
 export const getBlendUrl = async (accessToken: string) => {
     const response = await fetch(
         "https://spclient.wg.spotify.com/blend-invitation/v1/generate?market=from_token",
