@@ -77,17 +77,19 @@ export async function GET(request: NextRequest) {
                 { spotify_user_id: spotifyUserId, password_hash: passwordHash },
                 { onConflict: "spotify_user_id" }
             )
-            .select("id")
+            .select("id, spotify_user_id")
             .maybeSingle();
 
         if (userError || !userRow?.id) {
             throw new Error(userError?.message ?? "Failed to upsert user record");
         }
 
+        const supabaseUserId = userRow.id;
+
         const { data: existingTokenRow, error: existingTokenError } = await supabase
             .from("tokens")
             .select("refresh_token")
-            .eq("user_id", userRow.id)
+            .eq("user_id", supabaseUserId)
             .maybeSingle();
 
         if (existingTokenError) {
@@ -101,7 +103,7 @@ export async function GET(request: NextRequest) {
             .from("tokens")
             .upsert(
                 {
-                    user_id: userRow.id,
+                    user_id: supabaseUserId,
                     access_token: tokenInfo.access_token,
                     refresh_token: refreshTokenToStore,
                 },
@@ -120,7 +122,8 @@ export async function GET(request: NextRequest) {
         });
 
         const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
-        const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(userRow.id)}&token=${encodeURIComponent(password)}`;
+        const blendTargetId = userRow.spotify_user_id ?? spotifyUserId;
+        const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(blendTargetId)}&token=${encodeURIComponent(password)}`;
 
         const redirectUrl = new URL("/", url.origin);
         redirectUrl.searchParams.set("link", blendUrl);

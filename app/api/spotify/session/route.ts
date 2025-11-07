@@ -1,10 +1,10 @@
 import { Buffer } from "node:buffer";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import { SESSION_COOKIE_NAME, getSessionTokens } from "@/app/lib/spotify-token-store";
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
     const cookieStore = await cookies();
     const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
 

@@ -58,6 +58,9 @@ export default async function Home({
               </a>
             </div>
           )}
+          <Suspense fallback={<p className="text-sm text-zinc-600 dark:text-zinc-400">Loading token info…</p>}>
+            <TokenViewer />
+          </Suspense>
         </div>
       </main>
     </div>
