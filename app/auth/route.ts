@@ -1,3 +1,4 @@
+// quick redirect to the Spotify authorization endpoint
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 

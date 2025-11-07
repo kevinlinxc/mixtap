@@ -1,8 +1,10 @@
+// after redirect from Spotify authorization endpoint, trade received code for tokens, store them, generate simple text password 
+// for the user, store everything in supabase, and generate a link for usage, redirect back to / with the blend link stored. 
 import { NextRequest, NextResponse } from "next/server";
 
 import { exchangeCodeForToken, getCurrentUserId } from "@/app/lib/spotify";
 import { consumeAuthState } from "@/app/lib/spotify-auth-store";
-import { SESSION_COOKIE_NAME, storeSessionTokens, storeBlendLink } from "@/app/lib/spotify-token-store";
+import { SESSION_COOKIE_NAME, storeBlendLink } from "@/app/lib/spotify-token-store";
 import { generatePassword, hashPassword } from "@/app/lib/password";
 import { getAdminClient } from "@/app/utils/supabase/admin";
 
@@ -132,10 +134,9 @@ export async function GET(request: NextRequest) {
 
         const response = NextResponse.redirect(new URL("/", url.origin));
         const secure = process.env.NODE_ENV === "production";
-        storeSessionTokens(sessionId, tokenInfo);
         storeBlendLink(sessionId, blendUrl);
 
-        console.log("[spotify-callback] stored tokens and blend link for session", {
+        console.log("[spotify-callback] stored blend link for session", {
             sessionId,
             blendUrl,
         });
@@ -144,7 +145,7 @@ export async function GET(request: NextRequest) {
             httpOnly: true,
             secure,
             path: "/",
-            maxAge: tokenInfo.expires_in ?? 3600,
+            maxAge: 60 * 60 * 24, // 24 hours for blend link access
             sameSite: "lax",
         });
 
