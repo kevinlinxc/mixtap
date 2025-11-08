@@ -1,0 +1,259 @@
+﻿"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { RoundedBox, Sphere, Torus, Cone, Octahedron, Icosahedron } from "@react-three/drei";
+import * as THREE from "three";
+
+// 20 Phone Style Configurations with creative variations
+const PHONE_STYLES = [
+    { name: "Silver Classic", body: "#c0c0c0", screen: "#0a0a0a", bezel: "#a8a8a8", buttons: "#a0a0a0", logo: { type: "sphere", color: "#3b82f6", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#3b82f6" },
+    { name: "Midnight OLED", body: "#0a0a0a", screen: "#000000", bezel: "#1a1a1a", buttons: "#2a2a2a", logo: { type: "torus", color: "#06b6d4", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#06b6d4" },
+    { name: "Rose Gold Luxe", body: "#b76e79", screen: "#1a1a1a", bezel: "#9d5a65", buttons: "#a5636f", logo: { type: "octahedron", color: "#ec4899", glow: true }, island: { show: false, color: "#f5f5f5" }, screenGlow: "#ec4899" },
+    { name: "Frosted Glass", body: "#e8e8e8", screen: "#1a1a1a", bezel: "#f5f5f5", buttons: "#d4d4d4", logo: { type: "icosahedron", color: "#6366f1", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
+    { name: "Amethyst Pro", body: "#6b46c1", screen: "#000000", bezel: "#553c9a", buttons: "#5a3d8a", logo: { type: "cone", color: "#c084fc", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#a855f7" },
+    { name: "Arctic Titanium", body: "#8b9dc3", screen: "#0a0a0a", bezel: "#748aa7", buttons: "#7a92b0", logo: { type: "sphere", color: "#38bdf8", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#38bdf8" },
+    { name: "Obsidian Edge", body: "#1a1a1a", screen: "#000000", bezel: "#0a0a0a", buttons: "#2a2a2a", logo: { type: "torus", color: "#10b981", glow: true }, island: { show: false, color: "#10b981" }, screenGlow: "#10b981" },
+    { name: "24K Gold", body: "#d4af37", screen: "#1a1a1a", bezel: "#b8922f", buttons: "#c29f33", logo: { type: "octahedron", color: "#fbbf24", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
+    { name: "Graphite Matte", body: "#52525b", screen: "#0a0a0a", bezel: "#3f3f46", buttons: "#44444d", logo: { type: "icosahedron", color: "#a78bfa", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#8b5cf6" },
+    { name: "Pacific Blue", body: "#0284c7", screen: "#000000", bezel: "#0369a1", buttons: "#0277b5", logo: { type: "cone", color: "#7dd3fc", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#38bdf8" },
+    { name: "Emerald Dream", body: "#059669", screen: "#0a0a0a", bezel: "#047857", buttons: "#05825f", logo: { type: "sphere", color: "#6ee7b7", glow: true }, island: { show: false, color: "#ffffff" }, screenGlow: "#10b981" },
+    { name: "Sunset Coral", body: "#f97316", screen: "#1a1a1a", bezel: "#ea580c", buttons: "#f87315", logo: { type: "torus", color: "#fed7aa", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
+    { name: "Starlight White", body: "#fafafa", screen: "#0a0a0a", bezel: "#e5e5e5", buttons: "#f0f0f0", logo: { type: "octahedron", color: "#818cf8", glow: true }, island: { show: true, color: "#1a1a1a" }, screenGlow: "#6366f1" },
+    { name: "Crimson Edition", body: "#b91c1c", screen: "#000000", bezel: "#991b1b", buttons: "#a71d1d", logo: { type: "icosahedron", color: "#fca5a5", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#ef4444" },
+    { name: "Jade Green", body: "#15803d", screen: "#0a0a0a", bezel: "#166534", buttons: "#157439", logo: { type: "cone", color: "#86efac", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#22c55e" },
+    { name: "Burnt Orange", body: "#c2410c", screen: "#1a1a1a", bezel: "#9a3412", buttons: "#b03c10", logo: { type: "sphere", color: "#fdba74", glow: false }, island: { show: false, color: "#ffffff" }, screenGlow: null },
+    { name: "Purple Haze", body: "#7c3aed", screen: "#000000", bezel: "#6d28d9", buttons: "#7533e3", logo: { type: "torus", color: "#c4b5fd", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#a855f7" },
+    { name: "Champagne Rose", body: "#be7c68", screen: "#1a1a1a", bezel: "#a86a58", buttons: "#b3735f", logo: { type: "octahedron", color: "#f4a582", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
+    { name: "Storm Gray", body: "#475569", screen: "#0a0a0a", bezel: "#334155", buttons: "#3d4b5d", logo: { type: "icosahedron", color: "#7dd3fc", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#0ea5e9" },
+    { name: "Hot Pink", body: "#db2777", screen: "#000000", bezel: "#be185d", buttons: "#ce216e", logo: { type: "cone", color: "#fbcfe8", glow: true }, island: { show: false, color: "#ffffff" }, screenGlow: "#ec4899" },
+];
+
+function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number }; isNear: boolean; style: typeof PHONE_STYLES[0] }) {
+    const phoneRef = useRef<THREE.Group>(null);
+    const logoRef = useRef<THREE.Group>(null);
+
+    useFrame(({ clock }) => {
+        if (phoneRef.current) {
+            phoneRef.current.rotation.y = THREE.MathUtils.lerp(phoneRef.current.rotation.y, mousePos.x * 0.0015, 0.05);
+            phoneRef.current.rotation.x = THREE.MathUtils.lerp(phoneRef.current.rotation.x, mousePos.y * 0.001, 0.05);
+            phoneRef.current.position.x = THREE.MathUtils.lerp(phoneRef.current.position.x, mousePos.x * 0.005, 0.05);
+            phoneRef.current.position.y = THREE.MathUtils.lerp(phoneRef.current.position.y, -mousePos.y * 0.003, 0.05);
+        }
+        if (logoRef.current) {
+            logoRef.current.rotation.y = clock.getElapsedTime() * 0.5;
+            logoRef.current.position.z = 0.11 + Math.sin(clock.getElapsedTime() * 2) * 0.02;
+        }
+    });
+
+    return (
+        <group ref={phoneRef} scale={0.7}>
+            {/* Phone Body */}
+            <RoundedBox args={[2, 4.3, 0.15]} radius={0.28} smoothness={2}>
+                <meshBasicMaterial color={style.body} />
+            </RoundedBox>
+            {/* Bezel */}
+            <RoundedBox args={[1.94, 4.24, 0.1]} radius={0.25} smoothness={2} position={[0, 0, 0.076]}>
+                <meshBasicMaterial color={style.bezel} />
+            </RoundedBox>
+            {/* Screen */}
+            <RoundedBox args={[1.88, 4.18, 0.1]} radius={0.24} smoothness={2} position={[0, 0, 0.08]}>
+                <meshBasicMaterial color={style.screen} />
+            </RoundedBox>
+            {style.screenGlow && (
+                <RoundedBox args={[1.88, 4.18, 0.1]} radius={0.24} smoothness={2} position={[0, 0, 0.08]}>
+                    <meshBasicMaterial color={style.screenGlow} opacity={0.15} transparent />
+                </RoundedBox>
+            )}
+            {style.island.show && (
+                <RoundedBox args={[0.5, 0.12, 0.05]} radius={0.06} smoothness={2} position={[0, 1.89, 0.11]}>
+                    <meshBasicMaterial color={style.island.color} />
+                </RoundedBox>
+            )}
+            {/* Camera Bump */}
+            <RoundedBox args={[0.35, 0.35, 0.04]} radius={0.08} smoothness={2} position={[-0.65, 1.6, -0.08]}>
+                <meshBasicMaterial color={style.body} />
+            </RoundedBox>
+            <mesh position={[-0.72, 1.7, -0.05]}>
+                <cylinderGeometry args={[0.06, 0.06, 0.03, 16]} />
+                <meshBasicMaterial color="#1a1a1a" />
+            </mesh>
+            <mesh position={[-0.58, 1.7, -0.05]}>
+                <cylinderGeometry args={[0.06, 0.06, 0.03, 16]} />
+                <meshBasicMaterial color="#1a1a1a" />
+            </mesh>
+            <mesh position={[-0.72, 1.5, -0.05]}>
+                <cylinderGeometry args={[0.06, 0.06, 0.03, 16]} />
+                <meshBasicMaterial color="#1a1a1a" />
+            </mesh>
+            {/* Side Buttons */}
+            <RoundedBox args={[0.025, 0.3, 0.08]} radius={0.01} smoothness={1} position={[-1.01, 0.5, 0]}>
+                <meshBasicMaterial color={style.buttons} />
+            </RoundedBox>
+            <RoundedBox args={[0.025, 0.15, 0.08]} radius={0.01} smoothness={1} position={[-1.01, 0, 0]}>
+                <meshBasicMaterial color={style.buttons} />
+            </RoundedBox>
+            <RoundedBox args={[0.025, 0.15, 0.08]} radius={0.01} smoothness={1} position={[-1.01, -0.25, 0]}>
+                <meshBasicMaterial color={style.buttons} />
+            </RoundedBox>
+            <RoundedBox args={[0.025, 0.5, 0.08]} radius={0.01} smoothness={1} position={[1.01, 0.3, 0]}>
+                <meshBasicMaterial color={style.buttons} />
+            </RoundedBox>
+            <group ref={logoRef} position={[0, -1.2, 0.11]}>
+                {style.logo.glow && (
+                    <mesh>
+                        <sphereGeometry args={[0.35, 32, 32]} />
+                        <meshBasicMaterial color={style.logo.color} opacity={0.15} transparent />
+                    </mesh>
+                )}
+                {style.logo.type === "sphere" && (
+                    <Sphere args={[0.22, 32, 32]}>
+                        <meshBasicMaterial color={style.logo.color} />
+                    </Sphere>
+                )}
+                {style.logo.type === "torus" && (
+                    <Torus args={[0.18, 0.06, 16, 32]}>
+                        <meshBasicMaterial color={style.logo.color} />
+                    </Torus>
+                )}
+                {style.logo.type === "octahedron" && (
+                    <Octahedron args={[0.25]}>
+                        <meshBasicMaterial color={style.logo.color} />
+                    </Octahedron>
+                )}
+                {style.logo.type === "icosahedron" && (
+                    <Icosahedron args={[0.22]}>
+                        <meshBasicMaterial color={style.logo.color} />
+                    </Icosahedron>
+                )}
+                {style.logo.type === "cone" && (
+                    <Cone args={[0.2, 0.35, 32]}>
+                        <meshBasicMaterial color={style.logo.color} />
+                    </Cone>
+                )}
+            </group>
+        </group>
+    );
+}
+
+export default function Landing() {
+    const router = useRouter();
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const [isNear, setIsNear] = useState(false);
+    const [holdProgress, setHoldProgress] = useState(0);
+    const [isMouseInBounds, setIsMouseInBounds] = useState(true);
+    const [currentStyleIndex, setCurrentStyleIndex] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "ArrowRight") {
+                setCurrentStyleIndex((prev) => (prev + 1) % PHONE_STYLES.length);
+            } else if (e.key === "ArrowLeft") {
+                setCurrentStyleIndex((prev) => (prev - 1 + PHONE_STYLES.length) % PHONE_STYLES.length);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const mouseXRatio = (e.clientX - rect.left) / rect.width;
+            const mouseYRatio = (e.clientY - rect.top) / rect.height;
+            // Very forgiving bounds - only snap back at extreme edges
+            const inBounds = mouseXRatio >= 0.3 && mouseXRatio <= 0.7 && mouseYRatio >= 0.02 && mouseYRatio <= 0.98;
+            setIsMouseInBounds(inBounds);
+            if (!inBounds) {
+                setMousePos({ x: 0, y: 0 });
+                setIsNear(false);
+                return;
+            }
+            const x = (e.clientX - rect.left - centerX);
+            const y = (e.clientY - rect.top - centerY);
+            setMousePos({ x, y });
+            const logoY = -centerY + 150;
+            const dx = x - 0;
+            const dy = y - logoY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            setIsNear(distance < 80);
+        };
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
+    }, []);
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        let unlocked = false;
+        if (isNear && !unlocked) {
+            interval = setInterval(() => {
+                setHoldProgress((prev) => {
+                    const next = prev + 2;
+                    if (next >= 100 && !unlocked) {
+                        unlocked = true;
+                        router.push("/main");
+                        return 100;
+                    }
+                    return next;
+                });
+            }, 20);
+        } else {
+            setHoldProgress(0);
+        }
+        return () => clearInterval(interval);
+    }, [isNear, router]);
+
+    return (
+        <div ref={containerRef} className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-black via-zinc-950 to-black">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+            <div className="absolute left-1/2 top-[150px] z-10 -translate-x-1/2">
+                <div className="relative">
+                    {isNear && (
+                        <>
+                            <div className="absolute inset-0 -m-8 animate-ping rounded-full bg-green-500/20" />
+                            <div className="absolute inset-0 -m-12 animate-pulse rounded-full bg-green-500/10" style={{ animationDelay: "0.2s" }} />
+                            <div className="absolute inset-0 -m-16 animate-pulse rounded-full bg-green-500/5" style={{ animationDelay: "0.4s" }} />
+                        </>
+                    )}
+                    <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-black shadow-2xl shadow-green-500/50 ring-4 ring-green-500">
+                        <svg className="h-16 w-16 text-green-500" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+                        </svg>
+                    </div>
+                    {holdProgress > 0 && (
+                        <svg className="absolute -inset-2 h-36 w-36 -rotate-90" viewBox="0 0 144 144">
+                            <circle cx="72" cy="72" r="68" fill="none" stroke="currentColor" strokeWidth="4" className="text-green-500" strokeDasharray={`${(holdProgress / 100) * 427} 427`} strokeLinecap="round" />
+                        </svg>
+                    )}
+                </div>
+            </div>
+            <div className="pointer-events-none absolute inset-0 z-20">
+                <Canvas camera={{ position: [0, 0, 8], fov: 50 }} style={{ background: "transparent" }} gl={{ antialias: true }}>
+                    <ambientLight intensity={1.5} />
+                    <Phone3D mousePos={mousePos} isNear={isNear} style={PHONE_STYLES[currentStyleIndex]} />
+                </Canvas>
+            </div>
+            <div className="absolute bottom-32 left-1/2 z-30 -translate-x-1/2 text-center">
+                <div className="mb-4 rounded-lg bg-black/80 px-6 py-3 backdrop-blur-sm">
+                    <p className="text-lg font-semibold text-white">{PHONE_STYLES[currentStyleIndex].name}</p>
+                    <p className="text-sm text-zinc-400">{currentStyleIndex + 1} / {PHONE_STYLES.length}</p>
+                </div>
+                <div className="flex items-center gap-3 text-zinc-400">
+                    <kbd className="rounded bg-zinc-800 px-3 py-1 text-sm">←</kbd>
+                    <span className="text-sm">Use arrow keys to browse styles</span>
+                    <kbd className="rounded bg-zinc-800 px-3 py-1 text-sm">→</kbd>
+                </div>
+            </div>
+            <div className="absolute bottom-12 left-1/2 z-30 -translate-x-1/2 text-center">
+                <p className="text-sm text-zinc-400">
+                    {isNear ? "Hold near the Spotify logo to unlock..." : isMouseInBounds ? "Move your phone to the top to reach the Spotify logo" : "Move your mouse back to the screen"}
+                </p>
+            </div>
+        </div>
+    );
+}

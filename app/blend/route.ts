@@ -6,7 +6,7 @@ import { getAdminClient } from "@/app/utils/supabase/admin";
 
 const buildErrorRedirect = (base: string, reason: string) => {
   const normalizedBase = base.replace(/\/+$/, "");
-  const errorUrl = new URL("/", normalizedBase || "http://localhost:3000");
+  const errorUrl = new URL("/main", normalizedBase || "http://localhost:3000");
   errorUrl.searchParams.set("error", reason);
   return NextResponse.redirect(errorUrl);
 };

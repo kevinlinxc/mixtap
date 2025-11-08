@@ -27,19 +27,19 @@ export async function GET(request: NextRequest) {
     const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
     if (error) {
-        const response = NextResponse.redirect(new URL("/?error=" + encodeURIComponent(error), url.origin));
+        const response = NextResponse.redirect(new URL("/main?error=" + encodeURIComponent(error), url.origin));
         return response;
     }
 
     if (!code || !state) {
-        const response = NextResponse.redirect(new URL("/?error=missing_code", url.origin));
+        const response = NextResponse.redirect(new URL("/main?error=missing_code", url.origin));
         return response;
     }
 
     const authRecord = consumeAuthState(state);
 
     if (!authRecord) {
-        const response = NextResponse.redirect(new URL("/?error=invalid_state", url.origin));
+        const response = NextResponse.redirect(new URL("/main?error=invalid_state", url.origin));
         response.cookies.delete("spotify_tokens");
         return response;
     }
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!sessionId) {
-        const response = NextResponse.redirect(new URL("/?error=missing_session", url.origin));
+        const response = NextResponse.redirect(new URL("/main?error=missing_session", url.origin));
         return response;
     }
 
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
         const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
         const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(spotifyUserId)}&token=${encodeURIComponent(password)}`;
 
-        const response = NextResponse.redirect(new URL("/", url.origin));
+        const response = NextResponse.redirect(new URL("/main", url.origin));
         const secure = process.env.NODE_ENV === "production";
         storeBlendLink(sessionId, blendUrl);
 
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
             error: message,
         });
         const response = NextResponse.redirect(
-            new URL("/?error=" + encodeURIComponent(message.slice(0, 200)), url.origin)
+            new URL("/main?error=" + encodeURIComponent(message.slice(0, 200)), url.origin)
         );
         return response;
     }
