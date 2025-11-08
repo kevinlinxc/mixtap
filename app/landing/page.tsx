@@ -18,6 +18,7 @@ const PHONE_STYLES = [
 function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number }; isNear: boolean; style: typeof PHONE_STYLES[0] }) {
     const phoneRef = useRef<THREE.Group>(null);
     const logoRef = useRef<THREE.Group>(null);
+    const bezelRef = useRef<THREE.Mesh>(null);
 
     useFrame(({ clock }) => {
         if (phoneRef.current) {
@@ -30,6 +31,13 @@ function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number
             logoRef.current.rotation.y = clock.getElapsedTime() * 0.5;
             logoRef.current.position.z = 0.11 + Math.sin(clock.getElapsedTime() * 2) * 0.02;
         }
+        // Shimmer effect on bezel when near Spotify logo
+        if (bezelRef.current) {
+            const targetHeight = isNear ? 4.17 : 4.18;
+            const currentScale = bezelRef.current.scale.y;
+            const newScale = THREE.MathUtils.lerp(currentScale, targetHeight / 4.18, 0.1);
+            bezelRef.current.scale.y = newScale;
+        }
     });
 
     return (
@@ -39,7 +47,7 @@ function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number
                 <meshBasicMaterial color={style.body} />
             </RoundedBox>
             {/* Bezel */}
-            <RoundedBox args={[1.94, 4.24, 0.2]} radius={0.25} smoothness={2} position={[0, 0, 0.035]}>
+            <RoundedBox ref={bezelRef} args={[1.88, 4.18, 0.3]} radius={0.24} smoothness={2} position={[0, 0, 0.04]}>
                 <meshBasicMaterial color={style.bezel} />
             </RoundedBox>
             {/* Screen */}

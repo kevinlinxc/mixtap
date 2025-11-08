@@ -32,10 +32,10 @@ export default async function Main({
                 <div className="space-y-12 animate-fadeIn">
                     {/* Instructions Section */}
                     <section className="space-y-8">
-                        <h2 className="text-2xl font-semibold text-zinc-100">How It Works</h2>
+                        <h2 className="text-2xl font-semibold text-zinc-100 animate-fadeInUp">How It Works</h2>
 
                         {/* Step 1 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.1s' }}>
                             <div className="flex items-start gap-4">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
                                     1
@@ -50,7 +50,7 @@ export default async function Main({
                         </div>
 
                         {/* Step 2 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.2s' }}>
                             <div className="flex items-start gap-4">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
                                     2
@@ -78,7 +78,7 @@ export default async function Main({
                         </div>
 
                         {/* Step 3 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.3s' }}>
                             <div className="flex items-start gap-4">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
                                     3
@@ -111,7 +111,7 @@ export default async function Main({
                         </div>
 
                         {/* Step 4 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.4s' }}>
                             <div className="flex items-start gap-4">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
                                     4
