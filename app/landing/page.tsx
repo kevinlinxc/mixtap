@@ -6,28 +6,13 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { RoundedBox, Sphere, Torus, Cone, Octahedron, Icosahedron } from "@react-three/drei";
 import * as THREE from "three";
 
-// 20 Phone Style Configurations with creative variations
+// Selected Phone Styles - one will be randomly chosen on load
 const PHONE_STYLES = [
-    { name: "Silver Classic", body: "#c0c0c0", screen: "#0a0a0a", bezel: "#a8a8a8", buttons: "#a0a0a0", logo: { type: "sphere", color: "#3b82f6", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#3b82f6" },
-    { name: "Midnight OLED", body: "#0a0a0a", screen: "#000000", bezel: "#1a1a1a", buttons: "#2a2a2a", logo: { type: "torus", color: "#06b6d4", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#06b6d4" },
     { name: "Rose Gold Luxe", body: "#b76e79", screen: "#1a1a1a", bezel: "#9d5a65", buttons: "#a5636f", logo: { type: "octahedron", color: "#ec4899", glow: true }, island: { show: false, color: "#f5f5f5" }, screenGlow: "#ec4899" },
-    { name: "Frosted Glass", body: "#e8e8e8", screen: "#1a1a1a", bezel: "#f5f5f5", buttons: "#d4d4d4", logo: { type: "icosahedron", color: "#6366f1", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
     { name: "Amethyst Pro", body: "#6b46c1", screen: "#000000", bezel: "#553c9a", buttons: "#5a3d8a", logo: { type: "cone", color: "#c084fc", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#a855f7" },
-    { name: "Arctic Titanium", body: "#8b9dc3", screen: "#0a0a0a", bezel: "#748aa7", buttons: "#7a92b0", logo: { type: "sphere", color: "#38bdf8", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#38bdf8" },
-    { name: "Obsidian Edge", body: "#1a1a1a", screen: "#000000", bezel: "#0a0a0a", buttons: "#2a2a2a", logo: { type: "torus", color: "#10b981", glow: true }, island: { show: false, color: "#10b981" }, screenGlow: "#10b981" },
-    { name: "24K Gold", body: "#d4af37", screen: "#1a1a1a", bezel: "#b8922f", buttons: "#c29f33", logo: { type: "octahedron", color: "#fbbf24", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
-    { name: "Graphite Matte", body: "#52525b", screen: "#0a0a0a", bezel: "#3f3f46", buttons: "#44444d", logo: { type: "icosahedron", color: "#a78bfa", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#8b5cf6" },
-    { name: "Pacific Blue", body: "#0284c7", screen: "#000000", bezel: "#0369a1", buttons: "#0277b5", logo: { type: "cone", color: "#7dd3fc", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#38bdf8" },
+    { name: "24K Gold", body: "#d4af37", screen: "#1a1a1a", bezel: "#b8922f", buttons: "#c29f33", logo: { type: "torus", color: "#fbbf24", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: null },
     { name: "Emerald Dream", body: "#059669", screen: "#0a0a0a", bezel: "#047857", buttons: "#05825f", logo: { type: "sphere", color: "#6ee7b7", glow: true }, island: { show: false, color: "#ffffff" }, screenGlow: "#10b981" },
-    { name: "Sunset Coral", body: "#f97316", screen: "#1a1a1a", bezel: "#ea580c", buttons: "#f87315", logo: { type: "torus", color: "#fed7aa", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
-    { name: "Starlight White", body: "#fafafa", screen: "#0a0a0a", bezel: "#e5e5e5", buttons: "#f0f0f0", logo: { type: "octahedron", color: "#818cf8", glow: true }, island: { show: true, color: "#1a1a1a" }, screenGlow: "#6366f1" },
     { name: "Crimson Edition", body: "#b91c1c", screen: "#000000", bezel: "#991b1b", buttons: "#a71d1d", logo: { type: "icosahedron", color: "#fca5a5", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#ef4444" },
-    { name: "Jade Green", body: "#15803d", screen: "#0a0a0a", bezel: "#166534", buttons: "#157439", logo: { type: "cone", color: "#86efac", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#22c55e" },
-    { name: "Burnt Orange", body: "#c2410c", screen: "#1a1a1a", bezel: "#9a3412", buttons: "#b03c10", logo: { type: "sphere", color: "#fdba74", glow: false }, island: { show: false, color: "#ffffff" }, screenGlow: null },
-    { name: "Purple Haze", body: "#7c3aed", screen: "#000000", bezel: "#6d28d9", buttons: "#7533e3", logo: { type: "torus", color: "#c4b5fd", glow: true }, island: { show: true, color: "#ffffff" }, screenGlow: "#a855f7" },
-    { name: "Champagne Rose", body: "#be7c68", screen: "#1a1a1a", bezel: "#a86a58", buttons: "#b3735f", logo: { type: "octahedron", color: "#f4a582", glow: false }, island: { show: true, color: "#ffffff" }, screenGlow: null },
-    { name: "Storm Gray", body: "#475569", screen: "#0a0a0a", bezel: "#334155", buttons: "#3d4b5d", logo: { type: "icosahedron", color: "#7dd3fc", glow: true }, island: { show: true, color: "#f5f5f5" }, screenGlow: "#0ea5e9" },
-    { name: "Hot Pink", body: "#db2777", screen: "#000000", bezel: "#be185d", buttons: "#ce216e", logo: { type: "cone", color: "#fbcfe8", glow: true }, island: { show: false, color: "#ffffff" }, screenGlow: "#ec4899" },
 ];
 
 function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number }; isNear: boolean; style: typeof PHONE_STYLES[0] }) {
@@ -54,20 +39,20 @@ function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number
                 <meshBasicMaterial color={style.body} />
             </RoundedBox>
             {/* Bezel */}
-            <RoundedBox args={[1.94, 4.24, 0.1]} radius={0.25} smoothness={2} position={[0, 0, 0.076]}>
+            <RoundedBox args={[1.94, 4.24, 0.2]} radius={0.25} smoothness={2} position={[0, 0, 0.035]}>
                 <meshBasicMaterial color={style.bezel} />
             </RoundedBox>
             {/* Screen */}
-            <RoundedBox args={[1.88, 4.18, 0.1]} radius={0.24} smoothness={2} position={[0, 0, 0.08]}>
+            <RoundedBox args={[1.88, 4.18, 0.3]} radius={0.24} smoothness={2} position={[0, 0, 0.04]}>
                 <meshBasicMaterial color={style.screen} />
             </RoundedBox>
             {style.screenGlow && (
-                <RoundedBox args={[1.88, 4.18, 0.1]} radius={0.24} smoothness={2} position={[0, 0, 0.08]}>
+                <RoundedBox args={[1.88, 4.18, 0.2]} radius={0.24} smoothness={2} position={[0, 0, 0.04]}>
                     <meshBasicMaterial color={style.screenGlow} opacity={0.15} transparent />
                 </RoundedBox>
             )}
             {style.island.show && (
-                <RoundedBox args={[0.5, 0.12, 0.05]} radius={0.06} smoothness={2} position={[0, 1.89, 0.11]}>
+                <RoundedBox args={[0.5, 0.12, 0.05]} radius={0.06} smoothness={2} position={[0, 1.89, 0.17]}>
                     <meshBasicMaterial color={style.island.color} />
                 </RoundedBox>
             )}
@@ -100,7 +85,7 @@ function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number
             <RoundedBox args={[0.025, 0.5, 0.08]} radius={0.01} smoothness={1} position={[1.01, 0.3, 0]}>
                 <meshBasicMaterial color={style.buttons} />
             </RoundedBox>
-            <group ref={logoRef} position={[0, -1.2, 0.11]}>
+            <group ref={logoRef} position={[0, -1.2, 1.51]}>
                 {style.logo.glow && (
                     <mesh>
                         <sphereGeometry args={[0.35, 32, 32]} />
@@ -143,20 +128,8 @@ export default function Landing() {
     const [isNear, setIsNear] = useState(false);
     const [holdProgress, setHoldProgress] = useState(0);
     const [isMouseInBounds, setIsMouseInBounds] = useState(true);
-    const [currentStyleIndex, setCurrentStyleIndex] = useState(0);
+    const [currentStyleIndex] = useState(() => Math.floor(Math.random() * PHONE_STYLES.length));
     const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "ArrowRight") {
-                setCurrentStyleIndex((prev) => (prev + 1) % PHONE_STYLES.length);
-            } else if (e.key === "ArrowLeft") {
-                setCurrentStyleIndex((prev) => (prev - 1 + PHONE_STYLES.length) % PHONE_STYLES.length);
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, []);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -237,17 +210,6 @@ export default function Landing() {
                     <ambientLight intensity={1.5} />
                     <Phone3D mousePos={mousePos} isNear={isNear} style={PHONE_STYLES[currentStyleIndex]} />
                 </Canvas>
-            </div>
-            <div className="absolute bottom-32 left-1/2 z-30 -translate-x-1/2 text-center">
-                <div className="mb-4 rounded-lg bg-black/80 px-6 py-3 backdrop-blur-sm">
-                    <p className="text-lg font-semibold text-white">{PHONE_STYLES[currentStyleIndex].name}</p>
-                    <p className="text-sm text-zinc-400">{currentStyleIndex + 1} / {PHONE_STYLES.length}</p>
-                </div>
-                <div className="flex items-center gap-3 text-zinc-400">
-                    <kbd className="rounded bg-zinc-800 px-3 py-1 text-sm">←</kbd>
-                    <span className="text-sm">Use arrow keys to browse styles</span>
-                    <kbd className="rounded bg-zinc-800 px-3 py-1 text-sm">→</kbd>
-                </div>
             </div>
             <div className="absolute bottom-12 left-1/2 z-30 -translate-x-1/2 text-center">
                 <p className="text-sm text-zinc-400">
