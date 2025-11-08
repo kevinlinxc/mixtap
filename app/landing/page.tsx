@@ -129,6 +129,7 @@ export default function Landing() {
     const [holdProgress, setHoldProgress] = useState(0);
     const [isMouseInBounds, setIsMouseInBounds] = useState(true);
     const [currentStyleIndex] = useState(() => Math.floor(Math.random() * PHONE_STYLES.length));
+    const [isUnlocked, setIsUnlocked] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -162,14 +163,12 @@ export default function Landing() {
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
-        let unlocked = false;
-        if (isNear && !unlocked) {
+        if (isNear && !isUnlocked) {
             interval = setInterval(() => {
                 setHoldProgress((prev) => {
                     const next = prev + 2;
-                    if (next >= 100 && !unlocked) {
-                        unlocked = true;
-                        router.push("/main");
+                    if (next >= 100) {
+                        setIsUnlocked(true);
                         return 100;
                     }
                     return next;
@@ -179,7 +178,13 @@ export default function Landing() {
             setHoldProgress(0);
         }
         return () => clearInterval(interval);
-    }, [isNear, router]);
+    }, [isNear, isUnlocked]);
+
+    useEffect(() => {
+        if (isUnlocked) {
+            router.push("/main");
+        }
+    }, [isUnlocked, router]);
 
     return (
         <div ref={containerRef} className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-black via-zinc-950 to-black">
