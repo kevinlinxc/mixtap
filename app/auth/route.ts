@@ -24,7 +24,9 @@ export async function GET() {
         );
     }
 
-    const redirectUri = process.env.SPOTIFY_REDIRECT_URI ?? CALLBACK_FALLBACK;
+    const redirectUri = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}/login`
+        : CALLBACK_FALLBACK;
     const sessionId = randomUUID();
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);

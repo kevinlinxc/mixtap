@@ -60,7 +60,9 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const redirectUri = process.env.SPOTIFY_REDIRECT_URI ?? CALLBACK_FALLBACK;
+        const redirectUri = process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}/login`
+            : CALLBACK_FALLBACK;
 
         console.log("[spotify-callback] exchanging authorization code", {
             state,

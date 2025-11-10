@@ -32,7 +32,7 @@ export default async function Main({
                 <div className="space-y-6 animate-fadeIn">
                     {/* Description */}
                     <p className="text-center text-lg text-zinc-300 animate-fadeInUp">
-                        A tag that your friends can tap to make a Spotify Blend with you
+                        A tag that your friends can tap to make a Spotify Blend with you!
                     </p>
 
                     {/* Instructions Section */}
