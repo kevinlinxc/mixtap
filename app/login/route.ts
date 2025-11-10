@@ -129,7 +129,9 @@ export async function GET(request: NextRequest) {
             scope: tokenInfo.scope,
         });
 
-        const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+        const baseUrl = process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`.replace(/\/+$/, "")
+            : "http://localhost:3000";
         const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(spotifyUserId)}&token=${encodeURIComponent(password)}`;
 
         const response = NextResponse.redirect(new URL("/main", url.origin));

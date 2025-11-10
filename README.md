@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# mixtap
+NFC tag that your friends can tap to create a Spotify blend with you
 
-## Getting Started
 
-First, run the development server:
+Deployed at [mixtap.app](https://www.mixtap.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## How it works
+
+- Users authorize the app with Spotify to get access to create Blend invites on their behalf
+- Upon authorization, the app generates a unique Blend URL and stores the user's Spotify credentials securely in Supabase
+- The user writes this unique URL to an NFC tag using an NFC writing app
+- When someone taps the NFC tag, they're taken to the Blend URL endpoint
+- The endpoint:
+  - Verifies the authentication token in the URL
+  - Uses the stored Spotify credentials to request a fresh Blend invite link from Spotify
+  - Redirects the tapper to the new Blend URL, opening Spotify to create a Blend playlist
+
+The frontend provides:
+- A landing page with an interactive 3D phone animation showing how to "tap" 
+- User authentication flow with Spotify OAuth
+- Instructions for setting up your own NFC tag
+- Display of your unique Blend URL after authorization
+
+## Why is this complicated?
+
+Spotify doesn't provide a public API endpoint for Blend invites. The only way to get a Blend URL is throough their Private API that gets called when you hit "Invite to Blend" in the Spotify app. 
+Spotfiy probably won't be too happy about this.
+
+My forum post about it: [link](https://community.spotify.com/t5/Spotify-for-Developers/Programatically-get-blend-URL/m-p/7151095#M18847)
+
+## Local Setup
+
+### Env file
+
+Make a .env file with these variables:
+SPOTIFY_CLIENT_ID=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+
+### Install dependencies and run
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+npm install
+npm run dev
+```

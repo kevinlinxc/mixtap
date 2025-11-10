@@ -16,7 +16,9 @@ export async function GET(request: NextRequest) {
   const spotifyUserId = url.searchParams.get("id");
   const token = url.searchParams.get("token");
 
-  const baseUrl = process.env.BASE_URL ?? url.origin;
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : url.origin;
 
   if (!spotifyUserId || !token) {
     return buildErrorRedirect(baseUrl, "missing_credentials");
