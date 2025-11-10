@@ -28,42 +28,47 @@ export default async function Main({
             </header>
 
             {/* Main Content */}
-            <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
-                <div className="space-y-12 animate-fadeIn">
+            <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">
+                <div className="space-y-6 animate-fadeIn">
+                    {/* Description */}
+                    <p className="text-center text-lg text-zinc-300 animate-fadeInUp">
+                        A tag that your friends can tap to make a Spotify Blend with you
+                    </p>
+
                     {/* Instructions Section */}
-                    <section className="space-y-8">
-                        <h2 className="text-2xl font-semibold text-zinc-100 animate-fadeInUp">How It Works</h2>
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-semibold text-zinc-100 animate-fadeInUp">How It Works</h2>
 
                         {/* Step 1 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.1s' }}>
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.1s' }}>
+                            <div className="flex items-start gap-3">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-base font-bold text-green-500">
                                     1
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <h3 className="text-lg font-semibold text-zinc-100">Get Your Hands on an NFC Tag</h3>
+                                <div className="flex-1 space-y-1">
+                                    <h3 className="text-base font-semibold text-zinc-100">Get an NFC Tag</h3>
                                     <p className="text-sm text-zinc-400">
-                                        Purchase an NFC tag or sticker online or from a local electronics store. They're usually super cheap and your friends may have extra!
+                                        Buy an NFC tag online or from a local electronics store. They're cheap in bulk and you can share them with your friends!
                                     </p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Step 2 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.2s' }}>
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.2s' }}>
+                            <div className="flex items-start gap-3">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-base font-bold text-green-500">
                                     2
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <h3 className="text-lg font-semibold text-zinc-100">Authorize with Spotify to Get Your URL</h3>
+                                <div className="flex-1 space-y-1">
+                                    <h3 className="text-base font-semibold text-zinc-100">Authorize with Spotify to Get Your URL</h3>
                                     <p className="text-sm text-zinc-400">
                                         Click the button below to connect your Spotify account. Mixtap will generate a unique Blend URL that automatically updates with whoever taps your tag.
                                     </p>
                                     <div className="pt-2">
                                         <Link
                                             href="/auth"
-                                            className="inline-flex items-center justify-center rounded-md bg-green-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-600"
+                                            className="inline-flex items-center justify-center rounded-md bg-green-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-green-600"
                                         >
                                             Authorize with Spotify
                                         </Link>
@@ -78,13 +83,13 @@ export default async function Main({
                         </div>
 
                         {/* Step 3 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.3s' }}>
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.3s' }}>
+                            <div className="flex items-start gap-3">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-base font-bold text-green-500">
                                     3
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <h3 className="text-lg font-semibold text-zinc-100">Load It Onto the NFC Tag</h3>
+                                <div className="flex-1 space-y-1">
+                                    <h3 className="text-base font-semibold text-zinc-100">Load It Onto the NFC Tag</h3>
                                     <p className="text-sm text-zinc-400">
                                         Use an NFC writing app like NFC Tools (
                                         <a
@@ -104,20 +109,20 @@ export default async function Main({
                                         >
                                             Android
                                         </a>
-                                        ) to write your generated URL to the tag. The URL will be displayed below once you authorize.
+                                        ) to write your generated URL to the tag.
                                     </p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Step 4 */}
-                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.4s' }}>
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-lg font-bold text-green-500">
+                        <div className="group rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-green-500/50 hover:bg-zinc-900 animate-fadeInUp opacity-0" style={{ animationDelay: '0.4s' }}>
+                            <div className="flex items-start gap-3">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-base font-bold text-green-500">
                                     4
                                 </div>
-                                <div className="flex-1 space-y-2">
-                                    <h3 className="text-lg font-semibold text-zinc-100">Tap!</h3>
+                                <div className="flex-1 space-y-1">
+                                    <h3 className="text-base font-semibold text-zinc-100">Tap!</h3>
                                     <p className="text-sm text-zinc-400">
                                         When your friends tap the tag with their phone, they'll be taken to a new Spotify Blend URL that's automatically created for you!
                                     </p>

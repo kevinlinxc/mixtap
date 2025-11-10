@@ -19,18 +19,27 @@ function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number
     const phoneRef = useRef<THREE.Group>(null);
     const logoRef = useRef<THREE.Group>(null);
     const bezelRef = useRef<THREE.Mesh>(null);
+    const [opacity, setOpacity] = useState(1); // Start at 1 for now to debug
+    const fadeStartTimeRef = useRef<number | null>(null);
+    const [glowSize, setGlowSize] = useState(0.28);
 
     useFrame(({ clock }) => {
         if (phoneRef.current) {
-            phoneRef.current.rotation.y = THREE.MathUtils.lerp(phoneRef.current.rotation.y, mousePos.x * 0.0015, 0.05);
-            phoneRef.current.rotation.x = THREE.MathUtils.lerp(phoneRef.current.rotation.x, mousePos.y * 0.001, 0.05);
-            phoneRef.current.position.x = THREE.MathUtils.lerp(phoneRef.current.position.x, mousePos.x * 0.005, 0.05);
-            phoneRef.current.position.y = THREE.MathUtils.lerp(phoneRef.current.position.y, -mousePos.y * 0.003, 0.05);
+            // Slower lerp values for smoother, less jarring movement
+            const smoothness = 0.05;
+            phoneRef.current.rotation.y = THREE.MathUtils.lerp(phoneRef.current.rotation.y, mousePos.x * 0.0015, smoothness);
+            phoneRef.current.rotation.x = THREE.MathUtils.lerp(phoneRef.current.rotation.x, mousePos.y * 0.001, smoothness);
+            phoneRef.current.position.x = THREE.MathUtils.lerp(phoneRef.current.position.x, mousePos.x * 0.005, smoothness);
+            phoneRef.current.position.y = THREE.MathUtils.lerp(phoneRef.current.position.y, -mousePos.y * 0.003, smoothness);
         }
         if (logoRef.current) {
             logoRef.current.rotation.y = clock.getElapsedTime() * 0.5;
             logoRef.current.position.z = 0.11 + Math.sin(clock.getElapsedTime() * 2) * 0.02;
         }
+        // Animate glow size
+        const targetSize = isNear ? 0.4 : 0.3;
+        setGlowSize((prev) => THREE.MathUtils.lerp(prev, targetSize, 0.1));
+
         // Shimmer effect on bezel when near Spotify logo
         if (bezelRef.current) {
             const targetHeight = isNear ? 4.17 : 4.18;
@@ -93,36 +102,56 @@ function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number
             <RoundedBox args={[0.025, 0.5, 0.08]} radius={0.01} smoothness={1} position={[1.01, 0.3, 0]}>
                 <meshBasicMaterial color={style.buttons} />
             </RoundedBox>
-            <group ref={logoRef} position={[0, -1.2, 1.51]}>
+            <group ref={logoRef} position={[0, 0, 0.2]}>
                 {style.logo.glow && (
                     <mesh>
-                        <sphereGeometry args={[0.35, 32, 32]} />
-                        <meshBasicMaterial color={style.logo.color} opacity={0.15} transparent />
+                        <sphereGeometry args={[glowSize, 32, 32]} />
+                        <meshBasicMaterial color={style.logo.color} opacity={0.3} transparent />
                     </mesh>
                 )}
                 {style.logo.type === "sphere" && (
                     <Sphere args={[0.22, 32, 32]}>
-                        <meshBasicMaterial color={style.logo.color} />
+                        <meshStandardMaterial
+                            color={style.logo.color}
+                            emissive={style.logo.color}
+                            emissiveIntensity={isNear ? 1.5 : 0.5}
+                        />
                     </Sphere>
                 )}
                 {style.logo.type === "torus" && (
                     <Torus args={[0.18, 0.06, 16, 32]}>
-                        <meshBasicMaterial color={style.logo.color} />
+                        <meshStandardMaterial
+                            color={style.logo.color}
+                            emissive={style.logo.color}
+                            emissiveIntensity={isNear ? 1.5 : 0.5}
+                        />
                     </Torus>
                 )}
                 {style.logo.type === "octahedron" && (
                     <Octahedron args={[0.25]}>
-                        <meshBasicMaterial color={style.logo.color} />
+                        <meshStandardMaterial
+                            color={style.logo.color}
+                            emissive={style.logo.color}
+                            emissiveIntensity={isNear ? 1.5 : 0.5}
+                        />
                     </Octahedron>
                 )}
                 {style.logo.type === "icosahedron" && (
                     <Icosahedron args={[0.22]}>
-                        <meshBasicMaterial color={style.logo.color} />
+                        <meshStandardMaterial
+                            color={style.logo.color}
+                            emissive={style.logo.color}
+                            emissiveIntensity={isNear ? 1.5 : 0.5}
+                        />
                     </Icosahedron>
                 )}
                 {style.logo.type === "cone" && (
                     <Cone args={[0.2, 0.35, 32]}>
-                        <meshBasicMaterial color={style.logo.color} />
+                        <meshStandardMaterial
+                            color={style.logo.color}
+                            emissive={style.logo.color}
+                            emissiveIntensity={isNear ? 1.5 : 0.5}
+                        />
                     </Cone>
                 )}
             </group>
@@ -138,7 +167,16 @@ export default function Landing() {
     const [isMouseInBounds, setIsMouseInBounds] = useState(true);
     const [currentStyleIndex] = useState(() => Math.floor(Math.random() * PHONE_STYLES.length));
     const [isUnlocked, setIsUnlocked] = useState(false);
+    const [showLogo, setShowLogo] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        // Fade in the logo immediately on mount
+        const timer = setTimeout(() => {
+            setShowLogo(true);
+        }, 100);
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -197,7 +235,7 @@ export default function Landing() {
     return (
         <div ref={containerRef} className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-black via-zinc-950 to-black">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]" />
-            <div className="absolute left-1/2 top-[150px] z-10 -translate-x-1/2">
+            <div className={`absolute left-1/2 top-[150px] z-10 -translate-x-1/2 transition-opacity duration-1000 ${showLogo ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="relative">
                     {isNear && (
                         <>
