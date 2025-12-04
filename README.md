@@ -6,12 +6,12 @@ Deployed at [mixtap.app](https://www.mixtap.app)
 
 ## How it works
 
-- Users authorize the app with Spotify to get access to create Blend invites on their behalf
-- Upon authorization, the app generates a unique Blend URL and stores the user's Spotify credentials securely in Supabase
+- Users authorize mixtap with their Spotify login/oauth
+- Upon authorization, mixtap requests an access token/refresh token from Spotify and stores them securely in a database, then generates a unique, static URL for the user
 - The user writes this unique URL to an NFC tag using an NFC writing app
-- When someone taps the NFC tag, they're taken to the Blend URL endpoint
-- The endpoint:
-  - Verifies the authentication token in the URL
+- When someone taps the NFC tag, they're taken to the static URL
+- The static URL page:
+  - Verifies the authentication token in the URL, and matches it to stored credentials
   - Uses the stored Spotify credentials to request a fresh Blend invite link from Spotify
   - Redirects the tapper to the new Blend URL, opening Spotify to create a Blend playlist
 
