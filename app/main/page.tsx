@@ -48,7 +48,7 @@ export default async function Main({
                                 <div className="flex-1 space-y-1">
                                     <h3 className="text-base font-semibold text-zinc-100">Get an NFC Tag</h3>
                                     <p className="text-sm text-zinc-400">
-                                        Buy an NFC tag online or from a local electronics store. They're cheap in bulk and you can share them with your friends!
+                                        Buy an NFC tag online or from a local electronics store. They&apos;re cheap in bulk and you can share them with your friends!
                                     </p>
                                 </div>
                             </div>
@@ -124,7 +124,7 @@ export default async function Main({
                                 <div className="flex-1 space-y-1">
                                     <h3 className="text-base font-semibold text-zinc-100">Tap!</h3>
                                     <p className="text-sm text-zinc-400">
-                                        When your friends tap the tag with their phone, they'll be taken to a new Spotify Blend URL that's automatically created for you!
+                                        When your friends tap the tag with their phone, they&apos;ll be taken to a new Spotify Blend URL that&apos;s automatically created for you!
                                     </p>
                                 </div>
                             </div>

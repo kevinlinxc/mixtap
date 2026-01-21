@@ -6,7 +6,7 @@ import { getAdminClient } from "@/app/utils/supabase/admin";
 
 const buildErrorRedirect = (base: string, reason: string) => {
   const normalizedBase = base.replace(/\/+$/, "");
-  const errorUrl = new URL("/main", normalizedBase || "http://localhost:3000");
+  const errorUrl = new URL("/main", normalizedBase || "http://127.0.0.1:3000");
   errorUrl.searchParams.set("error", reason);
   return NextResponse.redirect(errorUrl);
 };
@@ -16,9 +16,17 @@ export async function GET(request: NextRequest) {
   const spotifyUserId = url.searchParams.get("id");
   const token = url.searchParams.get("token");
 
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
+  let origin = request.headers.get('x-forwarded-proto') && request.headers.get('x-forwarded-host')
+    ? `${request.headers.get('x-forwarded-proto')}://${request.headers.get('x-forwarded-host')}`
     : url.origin;
+  try {
+    const u = new URL(origin);
+    if (u.hostname === "localhost") {
+      u.hostname = "127.0.0.1";
+      origin = u.origin;
+    }
+  } catch { }
+  const baseUrl = origin !== 'null' ? origin : url.origin;
 
   if (!spotifyUserId || !token) {
     return buildErrorRedirect(baseUrl, "missing_credentials");

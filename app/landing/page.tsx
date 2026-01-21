@@ -19,8 +19,6 @@ function Phone3D({ mousePos, isNear, style }: { mousePos: { x: number; y: number
     const phoneRef = useRef<THREE.Group>(null);
     const logoRef = useRef<THREE.Group>(null);
     const bezelRef = useRef<THREE.Mesh>(null);
-    const [opacity, setOpacity] = useState(1); // Start at 1 for now to debug
-    const fadeStartTimeRef = useRef<number | null>(null);
     const [glowSize, setGlowSize] = useState(0.28);
 
     useFrame(({ clock }) => {
@@ -220,10 +218,17 @@ export default function Landing() {
                     return next;
                 });
             }, 20);
-        } else {
-            setHoldProgress(0);
         }
         return () => clearInterval(interval);
+    }, [isNear, isUnlocked]);
+
+    useEffect(() => {
+        if (!isNear && !isUnlocked) {
+            const timeout = setTimeout(() => {
+                setHoldProgress(0);
+            }, 0);
+            return () => clearTimeout(timeout);
+        }
     }, [isNear, isUnlocked]);
 
     useEffect(() => {

@@ -60,9 +60,17 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const redirectUri = process.env.VERCEL_URL
-            ? `https://${process.env.VERCEL_URL}/login`
-            : CALLBACK_FALLBACK;
+        let origin = request.headers.get('x-forwarded-proto') && request.headers.get('x-forwarded-host')
+            ? `${request.headers.get('x-forwarded-proto')}://${request.headers.get('x-forwarded-host')}`
+            : new URL(request.url).origin;
+        try {
+            const u = new URL(origin);
+            if (u.hostname === "localhost") {
+                u.hostname = "127.0.0.1";
+                origin = u.origin;
+            }
+        } catch { }
+        const redirectUri = origin !== 'null' ? `${origin}/login` : CALLBACK_FALLBACK;
 
         console.log("[spotify-callback] exchanging authorization code", {
             state,
@@ -131,9 +139,7 @@ export async function GET(request: NextRequest) {
             scope: tokenInfo.scope,
         });
 
-        const baseUrl = process.env.VERCEL_URL
-            ? `https://${process.env.VERCEL_URL}`.replace(/\/+$/, "")
-            : "http://localhost:3000";
+        const baseUrl = origin !== 'null' ? origin.replace(/\/+$/, "") : "http://127.0.0.1:3000";
         const blendUrl = `${baseUrl}/blend?id=${encodeURIComponent(spotifyUserId)}&token=${encodeURIComponent(password)}`;
 
         const response = NextResponse.redirect(new URL("/main", url.origin));

@@ -1,6 +1,6 @@
 // quick redirect to the Spotify authorization endpoint
 import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import {
     buildAuthorizeUrl,
@@ -14,7 +14,7 @@ const CALLBACK_FALLBACK = "http://127.0.0.1:3000/login";
 const STATE_TTL_SECONDS = 60 * 5;
 const SESSION_COOKIE_AGE_SECONDS = 60 * 60 * 6; // keep session around for token reuse
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
 
     if (!clientId) {
@@ -24,9 +24,17 @@ export async function GET() {
         );
     }
 
-    const redirectUri = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}/login`
-        : CALLBACK_FALLBACK;
+    let origin = request.headers.get('x-forwarded-proto') && request.headers.get('x-forwarded-host')
+        ? `${request.headers.get('x-forwarded-proto')}://${request.headers.get('x-forwarded-host')}`
+        : new URL(request.url).origin;
+    try {
+        const u = new URL(origin);
+        if (u.hostname === "localhost") {
+            u.hostname = "127.0.0.1";
+            origin = u.origin;
+        }
+    } catch { }
+    const redirectUri = origin !== 'null' ? `${origin}/login` : CALLBACK_FALLBACK;
     const sessionId = randomUUID();
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);
