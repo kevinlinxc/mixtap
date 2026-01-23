@@ -96,6 +96,7 @@ export const exchangeCodeForToken = async ({
 
     const payload = (await response.json()) as SpotifyTokenResponse;
     console.log("[spotify-lib] received access token", {
+        accessToken: payload.access_token,
         hasRefreshToken: Boolean(payload.refresh_token),
         expiresIn: payload.expires_in,
         scope: payload.scope,
@@ -130,41 +131,6 @@ export const refreshAccessToken = async ({
     }
 
     return (await response.json()) as SpotifyTokenResponse;
-};
-
-export const testToken = async (accessToken: string) => {
-    const response = await fetch("https://api.spotify.com/v1/me", {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    });
-
-    return response.ok;
-};
-
-export type SpotifyUserProfile = {
-    id: string;
-};
-
-export const getCurrentUserId = async (accessToken: string): Promise<string> => {
-    const response = await fetch("https://api.spotify.com/v1/me", {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    });
-
-    if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(`Failed to fetch Spotify user profile: ${JSON.stringify(errorPayload)}`);
-    }
-
-    const profile = (await response.json()) as SpotifyUserProfile;
-
-    if (!profile.id) {
-        throw new Error("Spotify user profile response did not include an id");
-    }
-
-    return profile.id;
 };
 
 export const getBlendUrl = async (accessToken: string) => {

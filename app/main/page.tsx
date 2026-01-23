@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { BlendLinkDisplay } from "../blend-link-display";
+import { BlendLinkDisplay } from "../components/blend-link-display";
+import { AuthButton } from "../components/auth-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -66,12 +67,7 @@ export default async function Main({
                                         Click the button below to connect your Spotify account. Mixtap will generate a unique Blend URL that automatically updates with whoever taps your tag.
                                     </p>
                                     <div className="pt-2">
-                                        <Link
-                                            href="/auth"
-                                            className="inline-flex items-center justify-center rounded-md bg-green-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-green-600"
-                                        >
-                                            Authorize with Spotify
-                                        </Link>
+                                        <AuthButton />
                                     </div>
                                     <div>
                                         <Suspense fallback={null}>
